@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Scale, Cpu } from 'lucide-react';
 
 interface MethodologyModalProps {
@@ -44,28 +44,50 @@ const RUBRIC = [
 ];
 
 export const MethodologyModal: React.FC<MethodologyModalProps> = ({ onClose }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="methodology-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
+    >
       <div className="bg-[#141C2F] border border-[#263247] rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl relative overflow-hidden">
         <div className="p-5 border-b border-[#232F46] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#1C263D] border border-[#2E3C5B] flex items-center justify-center text-cyan-300">
+            <div
+              className="w-8 h-8 rounded-lg bg-[#1C263D] border border-[#2E3C5B] flex items-center justify-center text-cyan-300"
+              aria-hidden="true"
+            >
               <Scale className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Scoring Methodology</h3>
+              <h2 id="methodology-modal-title" className="text-lg font-bold text-white">
+                Scoring Methodology
+              </h2>
               <p className="text-xs text-slate-400">100% deterministic code. Zero LLM hallucinations.</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">
-            <X className="w-5 h-5" />
+          <button
+            onClick={onClose}
+            aria-label="Close scoring methodology dialog"
+            className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          >
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         <div className="p-5 overflow-y-auto space-y-4">
           <div className="bg-[#0B1020] border border-[#232F46] p-4 rounded-xl text-xs sm:text-sm text-slate-300 space-y-2">
             <div className="font-bold text-slate-200 flex items-center gap-1.5 text-sm">
-              <Cpu className="w-4 h-4 text-cyan-400" />
+              <Cpu className="w-4 h-4 text-cyan-400" aria-hidden="true" />
               <span>Core Principle: Code Computes the Facts, AI Crafts Delivery</span>
             </div>
             <p className="leading-relaxed">
@@ -86,7 +108,7 @@ export const MethodologyModal: React.FC<MethodologyModalProps> = ({ onClose }) =
           </div>
 
           <div className="mt-4 pt-3 border-t border-[#232F46]">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Grade Tiers</h4>
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Grade Tiers</h3>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs font-mono">
               <div className="bg-[#0B1020] border border-emerald-800/80 p-2 rounded-lg text-emerald-300 font-bold">
                 90-100<div className="text-[10px] font-sans">Hire-ready</div>
@@ -110,7 +132,7 @@ export const MethodologyModal: React.FC<MethodologyModalProps> = ({ onClose }) =
         <div className="p-4 bg-[#0B1020] border-t border-[#232F46] flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-black font-semibold text-xs transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-black font-semibold text-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             Got it, close
           </button>

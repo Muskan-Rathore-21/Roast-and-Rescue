@@ -92,35 +92,41 @@ export const RoastBattle: React.FC<RoastBattleProps> = ({
       <form onSubmit={runBattle} className="bg-[#141C2F] border border-[#263247] rounded-3xl p-6 shadow-xl mb-8">
         <div className="grid grid-cols-1 md:grid-cols-11 gap-4 items-center">
           <div className="md:col-span-5 space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Contender 1</label>
+            <label htmlFor="battle-contender-1" className="text-xs font-semibold text-slate-300">
+              Contender 1
+            </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono">@</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono" aria-hidden="true">@</span>
               <input
                 type="text"
+                id="battle-contender-1"
                 value={userA}
                 onChange={(e) => setUserA(e.target.value)}
                 placeholder="username1"
-                className="w-full bg-[#0B1020] border border-[#232F46] focus:border-cyan-500/60 text-white rounded-xl pl-8 pr-3 py-2.5 text-sm font-mono focus:outline-none transition-colors"
+                className="w-full bg-[#0B1020] border border-[#232F46] focus:border-cyan-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 text-white rounded-xl pl-8 pr-3 py-2.5 text-sm font-mono transition-colors"
               />
             </div>
           </div>
 
           <div className="md:col-span-1 flex justify-center py-2 md:py-0">
-            <div className="w-9 h-9 rounded-full bg-[#1C263D] border border-[#2E3C5B] flex items-center justify-center font-black text-cyan-300 text-xs shadow-lg">
+            <div className="w-9 h-9 rounded-full bg-[#1C263D] border border-[#2E3C5B] flex items-center justify-center font-black text-cyan-300 text-xs shadow-lg" aria-hidden="true">
               VS
             </div>
           </div>
 
           <div className="md:col-span-5 space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Contender 2</label>
+            <label htmlFor="battle-contender-2" className="text-xs font-semibold text-slate-300">
+              Contender 2
+            </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono">@</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono" aria-hidden="true">@</span>
               <input
                 type="text"
+                id="battle-contender-2"
                 value={userB}
                 onChange={(e) => setUserB(e.target.value)}
                 placeholder="username2"
-                className="w-full bg-[#0B1020] border border-[#232F46] focus:border-cyan-500/60 text-white rounded-xl pl-8 pr-3 py-2.5 text-sm font-mono focus:outline-none transition-colors"
+                className="w-full bg-[#0B1020] border border-[#232F46] focus:border-cyan-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 text-white rounded-xl pl-8 pr-3 py-2.5 text-sm font-mono transition-colors"
               />
             </div>
           </div>

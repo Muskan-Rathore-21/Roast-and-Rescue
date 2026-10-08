@@ -37,6 +37,7 @@ interface LandingPageProps {
   onOpenBattle: () => void;
   onOpenMethodology: () => void;
   onOpenDatabaseVault: () => void;
+  onOpenTestRunner?: () => void;
   isDark?: boolean;
 }
 
@@ -57,7 +58,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onDeleteScan,
   onClearHistory,
   onOpenLogin,
+  onOpenBattle,
+  onOpenMethodology,
   onOpenDatabaseVault,
+  onOpenTestRunner,
   isDark = true,
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -70,7 +74,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const faqs = [
     {
       q: 'Where is my audit data saved and stored?',
-      a: 'All audited profiles, custom notes, developer tags, and battle results are stored permanently in your cloud database (Firestore). You can view, search, export to JSON/CSV, and manage your stored data anytime by clicking "Database Vault" in the navigation bar.',
+      a: 'All audited profiles, custom notes, developer tags, and battle results are stored permanently in your cloud database (Firestore & Supabase). You can view, search, export to JSON/CSV, and manage your stored data anytime by clicking "Database Vault" in the navigation bar.',
     },
     {
       q: 'Will running an audit modify anything in my GitHub account?',
@@ -97,9 +101,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[360px] bg-gradient-to-b from-blue-600/15 via-cyan-500/10 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
 
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6 shadow-md transition-all border bg-[#141C2F] border-[#263247] text-slate-200">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
           <span className="font-mono tracking-tight">DEVELOPER AUDIT ENGINE • CLOUD VAULT</span>
-          <span className="hidden sm:inline text-slate-600">|</span>
+          <span className="hidden sm:inline text-slate-600" aria-hidden="true">|</span>
           <span className="hidden sm:inline text-cyan-300 font-mono text-[11px]">Database Storage Enabled</span>
         </div>
 
@@ -135,18 +139,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   ? 'bg-[#0B1020] border-[#232F46] focus-within:border-cyan-500/60'
                   : 'bg-slate-50 border-slate-200 focus-within:border-slate-400'
               }`}>
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400" aria-hidden="true">
                   <Search className="w-5 h-5 text-cyan-400" />
                 </div>
+                <label htmlFor="github-search-input" className="sr-only">
+                  Enter GitHub username
+                </label>
                 <input
                   type="text"
+                  id="github-search-input"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
                   placeholder="Enter GitHub username (e.g. torvalds or alex-student-dev)"
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck="false"
-                  className={`w-full pl-11 pr-4 py-3.5 text-sm sm:text-base font-medium rounded-2xl bg-transparent outline-none transition-colors ${
+                  className={`w-full pl-11 pr-4 py-3.5 text-sm sm:text-base font-medium rounded-2xl bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors ${
                     isDark ? 'text-white placeholder:text-slate-500' : 'text-slate-900 placeholder:text-slate-400'
                   }`}
                 />
@@ -155,16 +163,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-black/30 border border-slate-200 transition-all cursor-pointer disabled:opacity-50 shrink-0 hover:scale-[1.02]"
+                aria-label={loading ? 'Auditing profile...' : 'Audit GitHub Profile'}
+                className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-black/30 border border-slate-200 transition-all cursor-pointer disabled:opacity-50 shrink-0 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
-                <Flame className="w-4 h-4 text-slate-950" />
+                <Flame className="w-4 h-4 text-slate-950" aria-hidden="true" />
                 <span>{loading ? 'Auditing...' : 'Audit Profile'}</span>
-                <ArrowRight className="w-4 h-4 text-slate-950" />
+                <ArrowRight className="w-4 h-4 text-slate-950" aria-hidden="true" />
               </button>
             </div>
 
             {inputError && (
-              <div className="text-xs text-rose-400 font-medium text-left px-2">
+              <div role="alert" className="text-xs text-rose-400 font-medium text-left px-2">
                 {inputError}
               </div>
             )}
@@ -172,13 +181,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
               <div className="flex items-center gap-2 text-xs">
                 <span className={`font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Roast Intensity:</span>
-                <div className={`flex items-center p-0.5 rounded-xl border ${
-                  isDark ? 'bg-[#0B1020] border-[#232F46]' : 'bg-slate-100 border-slate-200'
-                }`}>
+                <div
+                  role="radiogroup"
+                  aria-label="Select roast intensity"
+                  className={`flex items-center p-0.5 rounded-xl border ${
+                    isDark ? 'bg-[#0B1020] border-[#232F46]' : 'bg-slate-100 border-slate-200'
+                  }`}
+                >
                   <button
                     type="button"
+                    role="radio"
+                    aria-checked={intensity === 'gentle'}
                     onClick={() => setIntensity('gentle')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                       intensity === 'gentle'
                         ? isDark ? 'bg-[#1C263D] text-emerald-400 shadow-sm border border-[#2D3B55]' : 'bg-white text-emerald-700 shadow-sm'
                         : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-900'
@@ -188,8 +203,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </button>
                   <button
                     type="button"
+                    role="radio"
+                    aria-checked={intensity === 'medium'}
                     onClick={() => setIntensity('medium')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                       intensity === 'medium'
                         ? isDark ? 'bg-[#1C263D] text-cyan-300 shadow-sm border border-[#2D3B55]' : 'bg-white text-cyan-700 shadow-sm'
                         : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-900'
@@ -199,8 +216,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </button>
                   <button
                     type="button"
+                    role="radio"
+                    aria-checked={intensity === 'spicy'}
                     onClick={() => setIntensity('spicy')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                       intensity === 'spicy'
                         ? isDark ? 'bg-[#1C263D] text-rose-400 shadow-sm border border-[#2D3B55]' : 'bg-white text-rose-700 shadow-sm'
                         : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-900'
@@ -211,28 +230,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={onOpenDatabaseVault}
-                  className="text-xs text-cyan-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                  aria-label={`Open Database Storage Vault containing ${storedScans.length} scans`}
+                  className="text-xs text-cyan-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-md"
                 >
-                  <Database className="w-3 h-3" />
+                  <Database className="w-3 h-3" aria-hidden="true" />
                   <span>Database Vault ({storedScans.length})</span>
                 </button>
 
+                {onOpenTestRunner && (
+                  <button
+                    type="button"
+                    onClick={onOpenTestRunner}
+                    aria-label="Open test suite runner and accessibility inspector"
+                    className="text-xs text-emerald-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-md"
+                  >
+                    <ShieldCheck className="w-3 h-3" aria-hidden="true" />
+                    <span>Tests &amp; A11y</span>
+                  </button>
+                )}
+
                 {githubToken ? (
                   <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     <span>5k/hr Active</span>
                   </span>
                 ) : (
                   <button
                     type="button"
                     onClick={onOpenTokenModal}
-                    className="text-xs text-slate-400 hover:text-cyan-300 font-semibold underline flex items-center gap-1 cursor-pointer transition-colors"
+                    className="text-xs text-slate-400 hover:text-cyan-300 font-semibold underline flex items-center gap-1 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-md"
                   >
-                    <Key className="w-3 h-3 text-cyan-400" />
+                    <Key className="w-3 h-3 text-cyan-400" aria-hidden="true" />
                     <span>Rate limit protection</span>
                   </button>
                 )}
@@ -258,7 +290,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       setUsernameInput(demo.user);
                       onRunAudit(demo.user);
                     }}
-                    className={`px-2.5 py-1 rounded-xl text-xs font-mono font-medium border transition-colors cursor-pointer ${
+                    aria-label={`Audit demo profile for ${demo.user}`}
+                    className={`px-2.5 py-1 rounded-xl text-xs font-mono font-medium border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                       isDark
                         ? 'bg-[#0B1020] hover:bg-[#1C263D] border-[#263247] text-slate-300 hover:text-white'
                         : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
@@ -279,7 +312,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="flex items-center gap-3 text-left">
               <img
                 src={`https://github.com/${facts.username}.png`}
-                alt={facts.username}
+                alt={`${facts.username}'s avatar`}
                 className="w-10 h-10 rounded-full bg-slate-800 object-cover border border-[#263247]"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src =
@@ -295,22 +328,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
             <button
               onClick={onResumeAudit}
-              className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md border border-slate-200 cursor-pointer transition-all"
+              className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md border border-slate-200 cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               <span>Resume Audit</span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
+              <ArrowRight className="w-3.5 h-3.5 text-slate-950" aria-hidden="true" />
             </button>
           </div>
         )}
       </section>
 
       {/* ROAST OF THE DAY */}
-      <section className="max-w-4xl mx-auto px-4">
+      <section className="max-w-4xl mx-auto px-4" aria-label="Roast of the Day">
         <RoastOfTheDay isDark={isDark} />
       </section>
 
       {/* METRICS & PROOF BAR */}
-      <section className="max-w-5xl mx-auto px-4">
+      <section className="max-w-5xl mx-auto px-4" aria-label="Key Platform Metrics">
         <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 rounded-3xl border ${
           isDark ? 'bg-[#141C2F] border-[#263247] shadow-xl shadow-black/20' : 'bg-white border-slate-200 shadow-sm'
         }`}>
@@ -319,7 +352,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               100%
             </div>
             <div className={`text-xs mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              Cloud Stored in Firestore
+              Cloud Stored in Firestore &amp; Supabase
             </div>
           </div>
           <div className="text-center">
@@ -350,7 +383,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* FEATURES GRID */}
-      <section className="max-w-5xl mx-auto px-4">
+      <section className="max-w-5xl mx-auto px-4" aria-label="Key Features">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141C2F] border border-[#263247] text-xs font-mono text-cyan-300 font-semibold mb-3">
             <span>🛡️ THE RESCUE &amp; STORAGE ARSENAL</span>
@@ -367,7 +400,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className={`p-6 rounded-3xl border transition-all ${
             isDark ? 'bg-[#141C2F] border-[#263247] hover:border-slate-600 shadow-xl' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
           }`}>
-            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-cyan-400 border border-[#2E3C5B] flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-cyan-400 border border-[#2E3C5B] flex items-center justify-center mb-4" aria-hidden="true">
               <Database className="w-6 h-6" />
             </div>
             <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -381,7 +414,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className={`p-6 rounded-3xl border transition-all ${
             isDark ? 'bg-[#141C2F] border-[#263247] hover:border-slate-600 shadow-xl' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
           }`}>
-            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-emerald-400 border border-[#2E3C5B] flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-emerald-400 border border-[#2E3C5B] flex items-center justify-center mb-4" aria-hidden="true">
               <Code2 className="w-6 h-6" />
             </div>
             <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -395,7 +428,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className={`p-6 rounded-3xl border transition-all ${
             isDark ? 'bg-[#141C2F] border-[#263247] hover:border-slate-600 shadow-xl' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
           }`}>
-            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-amber-400 border border-[#2E3C5B] flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-amber-400 border border-[#2E3C5B] flex items-center justify-center mb-4" aria-hidden="true">
               <Flame className="w-6 h-6" />
             </div>
             <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -409,7 +442,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className={`p-6 rounded-3xl border transition-all ${
             isDark ? 'bg-[#141C2F] border-[#263247] hover:border-slate-600 shadow-xl' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
           }`}>
-            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-blue-400 border border-[#2E3C5B] flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-blue-400 border border-[#2E3C5B] flex items-center justify-center mb-4" aria-hidden="true">
               <MessageSquare className="w-6 h-6" />
             </div>
             <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -423,7 +456,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className={`p-6 rounded-3xl border transition-all ${
             isDark ? 'bg-[#141C2F] border-[#263247] hover:border-slate-600 shadow-xl' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
           }`}>
-            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-purple-400 border border-[#2E3C5B] flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-purple-400 border border-[#2E3C5B] flex items-center justify-center mb-4" aria-hidden="true">
               <Swords className="w-6 h-6" />
             </div>
             <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -437,7 +470,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className={`p-6 rounded-3xl border transition-all ${
             isDark ? 'bg-[#141C2F] border-[#263247] hover:border-slate-600 shadow-xl' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
           }`}>
-            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-teal-400 border border-[#2E3C5B] flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#1C263D] text-teal-400 border border-[#2E3C5B] flex items-center justify-center mb-4" aria-hidden="true">
               <BookOpen className="w-6 h-6" />
             </div>
             <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -452,10 +485,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* RECENT SCANS HISTORY */}
       {storedScans.length > 0 && (
-        <section className="max-w-5xl mx-auto px-4">
+        <section className="max-w-5xl mx-auto px-4" aria-label="Recent Scans in Database">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-cyan-400" />
+              <History className="w-4 h-4 text-cyan-400" aria-hidden="true" />
               <h3 className={`font-bold text-sm ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                 Recent Profile Audits in Database ({storedScans.length})
               </h3>
@@ -463,16 +496,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={onOpenDatabaseVault}
-                className="text-xs text-cyan-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                className="text-xs text-cyan-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-md"
               >
-                <Database className="w-3.5 h-3.5" />
+                <Database className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>View Full Vault</span>
               </button>
               <button
                 onClick={onClearHistory}
-                className="text-xs text-slate-400 hover:text-rose-400 flex items-center gap-1 transition-colors px-2.5 py-1 rounded-lg hover:bg-[#1E2B46] cursor-pointer"
+                aria-label="Clear all recent profile scans"
+                className="text-xs text-slate-400 hover:text-rose-400 flex items-center gap-1 transition-colors px-2.5 py-1 rounded-lg hover:bg-[#1E2B46] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Clear History</span>
               </button>
             </div>
@@ -494,16 +528,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
                   }`}
                 >
-                  <div
+                  <button
                     onClick={() => {
                       setUsernameInput(scan.username);
                       onSelectScan(scan.username);
                     }}
-                    className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1"
+                    aria-label={`Open audit report for @${scan.username}, score ${scan.score}`}
+                    className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg"
                   >
                     <img
                       src={scan.avatarUrl || `https://github.com/${scan.username}.png`}
-                      alt={scan.username}
+                      alt={`${scan.username}'s avatar`}
                       className="w-8 h-8 rounded-full bg-slate-800 object-cover shrink-0 border border-[#263247]"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src =
@@ -520,7 +555,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         {new Date(scan.scannedAt).toLocaleDateString()}
                       </div>
                     </div>
-                  </div>
+                  </button>
 
                   <div className="flex items-center gap-2 shrink-0">
                     <span className={`px-2 py-0.5 rounded font-mono font-bold text-xs border ${scoreColor}`}>
@@ -528,10 +563,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </span>
                     <button
                       onClick={() => onDeleteScan(scan.id)}
-                      title="Delete from history"
-                      className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-[#1E2B46] transition-colors cursor-pointer"
+                      aria-label={`Delete @${scan.username} from history`}
+                      className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-[#1E2B46] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -542,7 +577,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       )}
 
       {/* FAQ SECTION */}
-      <section className="max-w-3xl mx-auto px-4">
+      <section className="max-w-3xl mx-auto px-4" aria-label="Frequently Asked Questions">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141C2F] border border-[#263247] text-xs font-mono text-cyan-300 font-semibold mb-3">
             <span>💡 CLARITY FIRST</span>
@@ -565,15 +600,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveFaq(isOpen ? null : idx)}
-                  className="w-full p-4.5 text-left flex items-center justify-between gap-4 font-bold text-sm cursor-pointer"
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${idx}`}
+                  className="w-full p-4.5 text-left flex items-center justify-between gap-4 font-bold text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                 >
                   <span className={isDark ? 'text-white' : 'text-slate-900'}>{faq.q}</span>
-                  <span className="text-cyan-400 text-lg font-mono">{isOpen ? '−' : '+'}</span>
+                  <span className="text-cyan-400 text-lg font-mono" aria-hidden="true">{isOpen ? '−' : '+'}</span>
                 </button>
                 {isOpen && (
-                  <div className={`px-4.5 pb-4.5 text-xs sm:text-sm leading-relaxed border-t ${
-                    isDark ? 'border-[#232F46] text-slate-300' : 'border-slate-100 text-slate-600'
-                  }`}>
+                  <div
+                    id={`faq-answer-${idx}`}
+                    className={`px-4.5 pb-4.5 text-xs sm:text-sm leading-relaxed border-t ${
+                      isDark ? 'border-[#232F46] text-slate-300' : 'border-slate-100 text-slate-600'
+                    }`}
+                  >
                     {faq.a}
                   </div>
                 )}
@@ -584,7 +624,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* BOTTOM CTA */}
-      <section className="max-w-4xl mx-auto px-4 text-center">
+      <section className="max-w-4xl mx-auto px-4 text-center" aria-label="Call to Action">
         <div className={`p-8 sm:p-12 rounded-3xl border relative overflow-hidden shadow-2xl ${
           isDark
             ? 'bg-gradient-to-b from-[#141C2F] to-[#111827] border-[#263247]'
@@ -602,21 +642,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <button
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                document.getElementById('github-search-input')?.focus();
               }}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-black/30 border border-slate-200 cursor-pointer transition-all hover:scale-[1.02]"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-black/30 border border-slate-200 cursor-pointer transition-all hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
-              <Flame className="w-4 h-4 text-slate-950" />
+              <Flame className="w-4 h-4 text-slate-950" aria-hidden="true" />
               <span>Audit A Profile Now</span>
             </button>
             <button
               onClick={onOpenLogin}
-              className={`w-full sm:w-auto px-6 py-3.5 rounded-2xl border font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors ${
+              className={`w-full sm:w-auto px-6 py-3.5 rounded-2xl border font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                 isDark
                   ? 'bg-[#1C263D] hover:bg-[#24314E] text-slate-200 border-[#2E3C5B]'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300'
               }`}
             >
-              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <Sparkles className="w-4 h-4 text-cyan-400" aria-hidden="true" />
               <span>Log In / Sign Up (Free)</span>
             </button>
           </div>

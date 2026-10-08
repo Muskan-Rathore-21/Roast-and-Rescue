@@ -54,60 +54,77 @@ export const CategoryBars: React.FC<CategoryBarsProps> = ({ categoryScores, isDa
           return (
             <div
               key={key}
-              className={`border rounded-xl p-3 sm:p-3.5 transition-all cursor-pointer ${
+              className={`border rounded-xl transition-all ${
                 isDark
-                  ? 'bg-[#0B1020] border-[#232F46] hover:border-slate-700'
-                  : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                  ? 'bg-[#0B1020] border-[#232F46]'
+                  : 'bg-slate-50 border-slate-200'
               }`}
-              onClick={() => toggleExpand(key)}
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                    isDark ? 'bg-[#1C263D] text-cyan-400 border border-[#2E3C5B]' : 'bg-white text-slate-700 border border-slate-200'
-                  }`}>
-                    <Icon className="w-3.5 h-3.5" />
+              <button
+                type="button"
+                onClick={() => toggleExpand(key)}
+                aria-expanded={isExpanded}
+                aria-controls={`breakdown-details-${key}`}
+                className="w-full text-left p-3 sm:p-3.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-xl"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                      isDark ? 'bg-[#1C263D] text-cyan-400 border border-[#2E3C5B]' : 'bg-white text-slate-700 border border-slate-200'
+                    }`} aria-hidden="true">
+                      <Icon className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className={`text-xs sm:text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                        {item.label}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className={`text-xs sm:text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                      {item.label}
-                    </span>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className={`text-sm font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        {item.score}
+                      </span>
+                      <span className={`text-xs font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                        /{item.max}
+                      </span>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <span className={`text-sm font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {item.score}
-                    </span>
-                    <span className={`text-xs font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                      /{item.max}
-                    </span>
-                  </div>
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  )}
-                </div>
-              </div>
-
-              <div className={`mt-2.5 w-full h-2 rounded-full overflow-hidden ${
-                isDark ? 'bg-slate-800' : 'bg-slate-200'
-              }`}>
                 <div
-                  className={`h-full rounded-full bg-gradient-to-r ${gradientColor} transition-all duration-700`}
-                  style={{ width: `${Math.max(4, percentage)}%` }}
-                />
-              </div>
+                  role="progressbar"
+                  aria-valuenow={item.score}
+                  aria-valuemin={0}
+                  aria-valuemax={item.max}
+                  aria-label={`${item.label}: ${item.score} of ${item.max} points`}
+                  className={`mt-2.5 w-full h-2 rounded-full overflow-hidden ${
+                    isDark ? 'bg-slate-800' : 'bg-slate-200'
+                  }`}
+                >
+                  <div
+                    className={`h-full rounded-full bg-gradient-to-r ${gradientColor} transition-all duration-700`}
+                    style={{ width: `${Math.max(4, percentage)}%` }}
+                  />
+                </div>
+              </button>
 
               {isExpanded && (
-                <div className={`mt-3 pt-3 border-t text-xs space-y-1.5 animate-fadeIn ${
-                  isDark ? 'border-[#232F46] text-slate-300' : 'border-slate-200 text-slate-600'
-                }`}>
+                <div
+                  id={`breakdown-details-${key}`}
+                  className={`px-3.5 pb-3.5 pt-1 border-t text-xs space-y-1.5 animate-fadeIn ${
+                    isDark ? 'border-[#232F46] text-slate-300' : 'border-slate-200 text-slate-600'
+                  }`}
+                >
                   {item.breakdown.map((b: string, idx: number) => (
                     <div key={idx} className="flex items-start gap-2">
-                      <span className="text-black bg-slate-200 w-4 h-4 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">
+                      <span className="text-black bg-slate-200 w-4 h-4 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0" aria-hidden="true">
                         •
                       </span>
                       <span>{b}</span>

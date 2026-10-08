@@ -47,9 +47,16 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, grade, previousSc
   const scoreDiff = previousScore !== undefined ? score - previousScore : null;
 
   return (
-    <div className="flex flex-col items-center">
+    <div
+      role="progressbar"
+      aria-valuenow={displayedScore}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Profile Audit Score: ${score} out of 100, Grade: ${grade}`}
+      className="flex flex-col items-center"
+    >
       <div className="relative w-44 h-44 flex items-center justify-center">
-        <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 160 160">
+        <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 160 160" aria-hidden="true">
           <circle
             cx="80"
             cy="80"
@@ -73,14 +80,18 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, grade, previousSc
         </svg>
 
         <div className="absolute flex flex-col items-center justify-center text-center">
-          <span className={`text-4xl sm:text-5xl font-black tracking-tight font-mono transition-colors ${
-            isDark ? 'text-slate-100' : 'text-slate-900'
-          }`}>
+          <span
+            className={`text-4xl sm:text-5xl font-black tracking-tight font-mono transition-colors ${
+              isDark ? 'text-slate-100' : 'text-slate-900'
+            }`}
+          >
             {displayedScore}
           </span>
-          <span className={`text-[10px] font-semibold uppercase tracking-widest mt-0.5 ${
-            isDark ? 'text-slate-400' : 'text-slate-500'
-          }`}>
+          <span
+            className={`text-[10px] font-semibold uppercase tracking-widest mt-0.5 ${
+              isDark ? 'text-slate-400' : 'text-slate-500'
+            }`}
+          >
             / 100 PTS
           </span>
         </div>
@@ -94,17 +105,17 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({ score, grade, previousSc
         <div className="mt-2.5 flex items-center gap-1 text-[11px] font-medium font-mono">
           {scoreDiff > 0 ? (
             <span className="text-emerald-400 flex items-center gap-1 bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-800">
-              <TrendingUp className="w-3 h-3" />
+              <TrendingUp className="w-3 h-3" aria-hidden="true" />
               +{scoreDiff} pts since last audit
             </span>
           ) : scoreDiff < 0 ? (
             <span className="text-slate-400 flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
-              <TrendingDown className="w-3 h-3" />
+              <TrendingDown className="w-3 h-3" aria-hidden="true" />
               {scoreDiff} pts since last audit
             </span>
           ) : (
             <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>
-              <Minus className="w-3 h-3 inline" /> Same score as previous audit
+              <Minus className="w-3 h-3 inline" aria-hidden="true" /> Same score as previous audit
             </span>
           )}
         </div>

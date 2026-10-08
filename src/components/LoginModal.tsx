@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Github,
@@ -30,6 +30,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
   const [googleName, setGoogleName] = useState('Muskan Rathore');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleGitHubLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +77,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
       if (err instanceof GitHubApiError && err.status === 404) {
         setError(`GitHub account '@${clean}' not found. Please verify your handle.`);
       } else {
-        // Fallback for demo or offline
         const session: UserSession = {
           username: clean,
           name: clean,
@@ -138,7 +145,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="login-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn"
+    >
       <div className={`w-full max-w-md p-6 sm:p-7 rounded-3xl shadow-2xl relative border transition-colors ${
         isDark
           ? 'bg-[#141C2F] border-[#263247] text-slate-100'
@@ -146,35 +158,44 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
       }`}>
         <button
           onClick={onClose}
-          className={`absolute top-4 right-4 p-1.5 rounded-lg transition-colors cursor-pointer ${
+          aria-label="Close login dialog"
+          className={`absolute top-4 right-4 p-1.5 rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             isDark ? 'text-slate-400 hover:text-white hover:bg-[#1C263D]' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
           }`}
-          aria-label="Close modal"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         <div className="text-center mb-6">
-          <div className="w-11 h-11 rounded-2xl bg-[#1C263D] text-cyan-300 border border-[#2E3C5B] flex items-center justify-center mx-auto mb-3">
+          <div
+            className="w-11 h-11 rounded-2xl bg-[#1C263D] text-cyan-300 border border-[#2E3C5B] flex items-center justify-center mx-auto mb-3"
+            aria-hidden="true"
+          >
             <UserCheck className="w-5 h-5" />
           </div>
-          <h3 className={`text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <h2 id="login-modal-title" className={`text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
             Sign In to Roast &amp; Rescue
-          </h3>
+          </h2>
           <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             Unlock your custom Rescue Plan, README generator, and cloud sync.
           </p>
         </div>
 
-        <div className={`flex p-1 rounded-xl border mb-5 text-xs font-semibold ${
-          isDark ? 'bg-[#0B1020] border-[#232F46]' : 'bg-slate-100 border-slate-200'
-        }`}>
+        <div
+          role="tablist"
+          aria-label="Authentication providers"
+          className={`flex p-1 rounded-xl border mb-5 text-xs font-semibold ${
+            isDark ? 'bg-[#0B1020] border-[#232F46]' : 'bg-slate-100 border-slate-200'
+          }`}
+        >
           <button
+            role="tab"
+            aria-selected={method === 'github'}
             onClick={() => {
               setMethod('github');
               setError(null);
             }}
-            className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               method === 'github'
                 ? isDark
                   ? 'bg-[#1C263D] text-white shadow-sm border border-[#2E3C5B]'
@@ -184,15 +205,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <Github className="w-3.5 h-3.5" />
+            <Github className="w-3.5 h-3.5" aria-hidden="true" />
             <span>GitHub</span>
           </button>
           <button
+            role="tab"
+            aria-selected={method === 'google'}
             onClick={() => {
               setMethod('google');
               setError(null);
             }}
-            className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               method === 'google'
                 ? isDark
                   ? 'bg-[#1C263D] text-white shadow-sm border border-[#2E3C5B]'
@@ -202,7 +225,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -223,11 +246,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
             <span>Google</span>
           </button>
           <button
+            role="tab"
+            aria-selected={method === 'email'}
             onClick={() => {
               setMethod('email');
               setError(null);
             }}
-            className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               method === 'email'
                 ? isDark
                   ? 'bg-[#1C263D] text-white shadow-sm border border-[#2E3C5B]'
@@ -237,14 +262,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <Mail className="w-3.5 h-3.5" />
+            <Mail className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Email</span>
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl border border-rose-900/60 bg-slate-950 text-xs text-rose-300 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div role="alert" className="mb-4 p-3 rounded-xl border border-rose-900/60 bg-slate-950 text-xs text-rose-300 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
@@ -252,15 +277,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
         {method === 'github' && (
           <form onSubmit={handleGitHubLogin} className="space-y-4">
             <div>
-              <label className={`text-xs font-semibold block mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                GitHub Username / ID
+              <label htmlFor="login-github-username" className={`text-xs font-semibold block mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                GitHub Username
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-sm">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-sm" aria-hidden="true">
                   @
                 </span>
                 <input
                   type="text"
+                  id="login-github-username"
                   value={githubUser}
                   onChange={(e) => {
                     setGithubUser(e.target.value);
@@ -271,7 +297,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
                   autoCorrect="off"
                   spellCheck="false"
                   disabled={loading}
-                  className={`w-full border rounded-xl pl-8 pr-3 py-2.5 text-xs sm:text-sm font-mono focus:outline-none transition-colors ${
+                  className={`w-full border rounded-xl pl-8 pr-3 py-2.5 text-xs sm:text-sm font-mono focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors ${
                     isDark
                       ? 'bg-[#0B1020] border-[#232F46] text-white focus:border-cyan-500'
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-slate-400'
@@ -282,17 +308,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md border border-slate-200 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md border border-slate-200 transition-all cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-black" />
+                  <Loader2 className="w-4 h-4 animate-spin text-black" aria-hidden="true" />
                   <span>Verifying account...</span>
                 </>
               ) : (
                 <>
                   <span>Verify &amp; Sign In with GitHub</span>
-                  <ArrowRight className="w-4 h-4 text-black" />
+                  <ArrowRight className="w-4 h-4 text-black" aria-hidden="true" />
                 </>
               )}
             </button>
@@ -302,15 +328,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
         {method === 'google' && (
           <form onSubmit={handleGoogleLogin} className="space-y-4">
             <div>
-              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              <label htmlFor="login-google-name" className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Account Name
               </label>
               <input
                 type="text"
+                id="login-google-name"
                 value={googleName}
                 onChange={(e) => setGoogleName(e.target.value)}
                 placeholder="Your Name"
-                className={`w-full border rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none transition-colors ${
+                className={`w-full border rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors ${
                   isDark
                     ? 'bg-[#0B1020] border-[#232F46] text-white focus:border-cyan-500'
                     : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-slate-400'
@@ -318,15 +345,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
               />
             </div>
             <div>
-              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              <label htmlFor="login-google-email" className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Email Address
               </label>
               <input
                 type="email"
+                id="login-google-email"
                 value={googleEmail}
                 onChange={(e) => setGoogleEmail(e.target.value)}
                 placeholder="your.email@gmail.com"
-                className={`w-full border rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none transition-colors ${
+                className={`w-full border rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors ${
                   isDark
                     ? 'bg-[#0B1020] border-[#232F46] text-white focus:border-cyan-500'
                     : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-slate-400'
@@ -335,7 +363,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-black border border-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-black border border-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               <span>Continue with Google</span>
             </button>
@@ -345,15 +373,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
         {method === 'email' && (
           <form onSubmit={handleEmailLogin} className="space-y-3.5">
             <div>
-              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              <label htmlFor="login-email-name" className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Full Name
               </label>
               <input
                 type="text"
+                id="login-email-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Jane Developer"
-                className={`w-full border rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none transition-colors ${
+                className={`w-full border rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors ${
                   isDark
                     ? 'bg-[#0B1020] border-[#232F46] text-white focus:border-cyan-500'
                     : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-slate-400'
@@ -361,15 +390,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
               />
             </div>
             <div>
-              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              <label htmlFor="login-email-address" className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Email Address
               </label>
               <input
                 type="email"
+                id="login-email-address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jane@example.com"
-                className={`w-full border rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none transition-colors ${
+                className={`w-full border rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors ${
                   isDark
                     ? 'bg-[#0B1020] border-[#232F46] text-white focus:border-cyan-500'
                     : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-slate-400'
@@ -377,15 +407,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
               />
             </div>
             <div>
-              <label className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              <label htmlFor="login-email-password" className={`text-xs font-semibold block mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Password (Optional)
               </label>
               <input
                 type="password"
+                id="login-email-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className={`w-full border rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none transition-colors ${
+                className={`w-full border rounded-xl px-3 py-2 text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors ${
                   isDark
                     ? 'bg-[#0B1020] border-[#232F46] text-white focus:border-cyan-500'
                     : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-slate-400'
@@ -394,10 +425,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md border border-slate-200 transition-all cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md border border-slate-200 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               <span>Sign In with Email</span>
-              <ArrowRight className="w-4 h-4 text-black" />
+              <ArrowRight className="w-4 h-4 text-black" aria-hidden="true" />
             </button>
           </form>
         )}
@@ -406,9 +437,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
           <button
             type="button"
             onClick={handleDemoLogin}
-            className="text-xs underline font-medium flex items-center justify-center gap-1 mx-auto cursor-pointer text-cyan-300 hover:text-white"
+            className="text-xs underline font-medium flex items-center justify-center gap-1 mx-auto cursor-pointer text-cyan-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-md"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Try instant 1-click Demo Account (@alex-student-dev)</span>
           </button>
         </div>
@@ -416,7 +447,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLoginSuccess,
         <div className={`mt-3.5 flex items-center justify-center gap-1.5 text-[11px] font-mono ${
           isDark ? 'text-slate-400' : 'text-slate-500'
         }`}>
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
           <span>Synchronized with cloud database storage</span>
         </div>
       </div>

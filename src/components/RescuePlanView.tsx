@@ -52,7 +52,7 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
       }`}>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xl">🛠️</span>
+            <span className="text-xl" aria-hidden="true">🛠️</span>
             <h3 className={`text-lg sm:text-xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
               The Rescue Plan
             </h3>
@@ -76,13 +76,20 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
               <div className={`text-[10px] font-mono flex items-center gap-1 justify-end ${
                 isDark ? 'text-slate-400' : 'text-slate-500'
               }`}>
-                <CloudCheck className="w-3 h-3 text-emerald-400" />
+                <CloudCheck className="w-3 h-3 text-emerald-400" aria-hidden="true" />
                 <span>Cloud Synced</span>
               </div>
             </div>
-            <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs font-mono ${
-              isDark ? 'border-emerald-500/60 text-emerald-400' : 'border-emerald-300 text-emerald-700'
-            }`}>
+            <div
+              role="progressbar"
+              aria-valuenow={progressPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Rescue plan completion: ${progressPercent}%`}
+              className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-xs font-mono ${
+                isDark ? 'border-emerald-500/60 text-emerald-400' : 'border-emerald-300 text-emerald-700'
+              }`}
+            >
               {progressPercent}%
             </div>
           </div>
@@ -90,12 +97,17 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        <div className={`flex items-center gap-1 p-1 rounded-xl border text-xs ${
-          isDark ? 'bg-[#0B1020] border-[#232F46]' : 'bg-slate-100 border-slate-200'
-        }`}>
+        <div
+          role="group"
+          aria-label="Filter rescue plan tasks"
+          className={`flex items-center gap-1 p-1 rounded-xl border text-xs ${
+            isDark ? 'bg-[#0B1020] border-[#232F46]' : 'bg-slate-100 border-slate-200'
+          }`}
+        >
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
+            aria-pressed={filter === 'all'}
+            className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               filter === 'all'
                 ? isDark
                   ? 'bg-[#1C263D] text-white font-bold border border-[#2E3C5B]'
@@ -109,7 +121,8 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
           </button>
           <button
             onClick={() => setFilter('high-impact')}
-            className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
+            aria-pressed={filter === 'high-impact'}
+            className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               filter === 'high-impact'
                 ? isDark
                   ? 'bg-[#1C263D] text-white font-bold border border-[#2E3C5B]'
@@ -123,7 +136,8 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
           </button>
           <button
             onClick={() => setFilter('quick-wins')}
-            className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
+            aria-pressed={filter === 'quick-wins'}
+            className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               filter === 'quick-wins'
                 ? isDark
                   ? 'bg-[#1C263D] text-white font-bold border border-[#2E3C5B]'
@@ -139,9 +153,9 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
 
         <button
           onClick={onGenerateProfileReadme}
-          className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-black border border-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+          className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-black border border-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
         >
-          <Sparkles className="w-3.5 h-3.5 text-black" />
+          <Sparkles className="w-3.5 h-3.5 text-black" aria-hidden="true" />
           <span>Generate Profile README.md</span>
         </button>
       </div>
@@ -172,23 +186,40 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
                   : 'bg-slate-50 border-slate-200 hover:border-slate-300'
               }`}
             >
-              <div
-                onClick={() => toggleExpand(item.id)}
-                className="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer"
-              >
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <button
                     onClick={(e) => toggleCheck(item.id, e)}
-                    className="shrink-0 p-0.5 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
-                    title={isDone ? 'Mark as incomplete' : 'Mark as done'}
+                    onKeyDown={(e) => {
+                      if (e.key === ' ' || e.key === 'Enter') {
+                        e.preventDefault();
+                        const updated = { ...completedIds, [item.id]: !completedIds[item.id] };
+                        setCompletedIds(updated);
+                        if (onSaveProgressToCloud) {
+                          const activeIds = Object.keys(updated).filter((k) => updated[k]);
+                          onSaveProgressToCloud(activeIds);
+                        }
+                      }
+                    }}
+                    role="checkbox"
+                    aria-checked={isDone}
+                    aria-label={`Mark task "${item.title}" as ${isDone ? 'incomplete' : 'complete'}`}
+                    className="shrink-0 p-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                   >
                     {isDone ? (
-                      <CheckSquare className="w-5 h-5 text-emerald-400" />
+                      <CheckSquare className="w-5 h-5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <Square className="w-5 h-5" />
+                      <Square className="w-5 h-5" aria-hidden="true" />
                     )}
                   </button>
-                  <div className="min-w-0">
+
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(item.id)}
+                    aria-expanded={isExpanded}
+                    aria-controls={`step-details-${item.id}`}
+                    className="text-left min-w-0 flex-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg p-1"
+                  >
                     <div className="flex items-center gap-2">
                       <span className={`text-[11px] font-mono font-bold ${
                         isDark ? 'text-slate-400' : 'text-slate-500'
@@ -207,7 +238,7 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
                         {item.title}
                       </h4>
                     </div>
-                  </div>
+                  </button>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -219,18 +250,28 @@ export const RescuePlanView: React.FC<RescuePlanViewProps> = ({
                   }`}>
                     {item.effort}
                   </span>
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(item.id)}
+                    aria-label={isExpanded ? `Collapse details for ${item.title}` : `Expand details for ${item.title}`}
+                    className="p-1 rounded-md text-slate-400 hover:text-white cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               {isExpanded && (
-                <div className={`px-4 pb-4 pt-1 border-t text-xs space-y-3 animate-fadeIn ${
-                  isDark ? 'border-[#232F46]' : 'border-slate-200'
-                }`}>
+                <div
+                  id={`step-details-${item.id}`}
+                  className={`px-4 pb-4 pt-1 border-t text-xs space-y-3 animate-fadeIn ${
+                    isDark ? 'border-[#232F46]' : 'border-slate-200'
+                  }`}
+                >
                   <div className="mt-2">
                     <span className="font-bold text-black bg-slate-200 px-2 py-0.5 rounded text-[11px] inline-block mb-1 shadow-sm">
                       Why this matters:

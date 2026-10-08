@@ -171,8 +171,10 @@ export const RepoCard: React.FC<RepoCardProps> = ({ repo, roastItem, onGenerateR
           )}
         </div>
         <button
+          type="button"
           onClick={() => onGenerateReadme(repo.name)}
-          className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors border cursor-pointer ${
+          aria-label={`Generate clean professional README markdown template for ${repo.name}`}
+          className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors border cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             isDark
               ? 'bg-[#1C263D] hover:bg-[#25324E] text-white border-[#2E3C5B]'
               : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
