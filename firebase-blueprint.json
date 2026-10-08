@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "auditScan": {
+      "title": "Audit Scan",
+      "description": "A saved GitHub profile roast and audit score record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique scan ID" },
+        "username": { "type": "string", "description": "GitHub username audited" },
+        "avatarUrl": { "type": "string", "description": "Avatar image URL" },
+        "score": { "type": "number", "description": "0-100 deterministic audit score" },
+        "grade": { "type": "string", "description": "Letter grade tier" },
+        "headlineRoast": { "type": "string", "description": "Punchy headline roast" },
+        "scannedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of scan" },
+        "userId": { "type": "string", "description": "User UID who generated this scan or 'anonymous'" },
+        "isPublic": { "type": "boolean", "description": "Whether visible to public recent feed" }
+      },
+      "required": ["id", "username", "score", "grade", "scannedAt"]
+    },
+    "userProfile": {
+      "title": "User Profile",
+      "description": "Authenticated user profile and session data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "username": { "type": "string", "description": "GitHub username or handle" },
+        "name": { "type": "string", "description": "Display name" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "avatarUrl": { "type": "string", "description": "Profile picture URL" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account registration timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["uid", "username", "name"]
+    },
+    "battleRecord": {
+      "title": "Roast Battle Record",
+      "description": "Head-to-head developer duel outcome",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique battle ID" },
+        "userA": { "type": "string", "description": "Contender 1 username" },
+        "userB": { "type": "string", "description": "Contender 2 username" },
+        "scoreA": { "type": "number", "description": "Contender 1 score" },
+        "scoreB": { "type": "number", "description": "Contender 2 score" },
+        "winner": { "type": "string", "enum": ["A", "B", "TIE"], "description": "Winning contender" },
+        "verdict": { "type": "string", "description": "Ref critique and score margin" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Duel timestamp" }
+      },
+      "required": ["id", "userA", "userB", "scoreA", "scoreB", "winner", "createdAt"]
+    },
+    "rescueProgress": {
+      "title": "Rescue Checklist Progress",
+      "description": "Completed checklist items for user roadmap",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Progress document ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "username": { "type": "string", "description": "Target profile username" },
+        "completedItemIds": { "type": "array", "description": "Array of completed rescue item IDs" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" }
+      },
+      "required": ["id", "userId", "username", "completedItemIds"]
+    }
+  },
+  "firestore": {
+    "/auditScans/{scanId}": {
+      "schema": { "$ref": "#/entities/auditScan" },
+      "description": "Public and user-saved audit scans"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/userProfile" },
+      "description": "User profile records"
+    },
+    "/battleRecords/{battleId}": {
+      "schema": { "$ref": "#/entities/battleRecord" },
+      "description": "History of head-to-head roast duels"
+    },
+    "/rescueProgress/{progressId}": {
+      "schema": { "$ref": "#/entities/rescueProgress" },
+      "description": "Saved user progress on rescue roadmaps"
+    }
+  }
+}

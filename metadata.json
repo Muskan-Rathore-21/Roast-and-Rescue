@@ -1,0 +1,8 @@
+{
+  "name": "Roast & Rescue - Developer Portfolio Audit & Cloud Vault",
+  "description": "Developer GitHub portfolio audit tool with deterministic 100-point rubric, recruiter verdict, and persistent cloud database storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

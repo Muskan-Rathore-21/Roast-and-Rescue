@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Audit Scans collection (persistent database for developer scans)
+    match /auditScans/{scanId} {
+      allow get: if isValidId(scanId);
+      allow list: if true;
+      allow create: if isValidId(scanId)
+        && request.resource.data.username is string
+        && request.resource.data.username.size() > 0
+        && request.resource.data.username.size() <= 60
+        && request.resource.data.score is number
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 100
+        && request.resource.data.grade is string;
+      allow update: if isValidId(scanId)
+        && request.resource.data.username is string
+        && request.resource.data.score is number;
+      allow delete: if isValidId(scanId);
+    }
+
+    // User profiles collection
+    match /users/{userId} {
+      allow get: if isValidId(userId);
+      allow list: if isSignedIn();
+      allow create, update: if isValidId(userId)
+        && request.resource.data.username is string;
+      allow delete: if isOwner(userId);
+    }
+
+    // Roast Battles records
+    match /battleRecords/{battleId} {
+      allow get: if isValidId(battleId);
+      allow list: if true;
+      allow create: if isValidId(battleId)
+        && request.resource.data.userA is string
+        && request.resource.data.userB is string
+        && request.resource.data.scoreA is number
+        && request.resource.data.scoreB is number;
+    }
+
+    // Rescue Progress checklist
+    match /rescueProgress/{progressId} {
+      allow get: if isValidId(progressId);
+      allow list: if true;
+      allow create, update: if isValidId(progressId)
+        && request.resource.data.username is string;
+      allow delete: if isValidId(progressId);
+    }
+  }
+}
